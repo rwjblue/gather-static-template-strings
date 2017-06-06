@@ -1,6 +1,6 @@
 {
   "name": "gather-static-template-strings",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generate a list of static strings in application templates.",
   "main": "index.js",
   "author": "Robert Jackson <me@rwjblue.com>",
