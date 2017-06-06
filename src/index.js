@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const walkSync = require('walk-sync');
 const compiler = require('@glimmer/compiler');
 
@@ -48,10 +49,10 @@ module.exports = class CollectStrings {
   constructor(_options) {
     let options = _options || {};
     this._path = options.path || process.cwd();
+    this._mangle = 'mangle' in options ? options.mangle : true;
     this.options = options;
 
     this._counter = new StringCounter();
-
   }
 
   populate() {
@@ -70,6 +71,17 @@ module.exports = class CollectStrings {
   }
 
   get strings() {
-    return this._counter.map;
+    let map = this._counter.map;
+
+    if (this._mangle) {
+      let mangledMap = Object.create(null);
+      for (let key in map) {
+        let mangledKey = crypto.createHash('sha256').update(key).digest('hex');
+        mangledMap[mangledKey] = map[key];
+      }
+      return mangledMap;
+    } else {
+      return map;
+    }
   }
 };
