@@ -42,6 +42,7 @@ module.exports = class CollectStrings {
     this.options = options;
 
     this._map = Object.create(null);
+    this._files = null;
   }
 
   incrementStringCount(string) {
@@ -49,12 +50,19 @@ module.exports = class CollectStrings {
     this._map[string] = count + 1;
   }
 
-  populate() {
-    let files = walkSync(this._path, { globs: ['**/*.hbs'], directories: false });
-    for (let relativePath of files) {
-      if (relativePath.startsWith('tmp')) { continue; }
-      if (relativePath.startsWith('node_modules')) { continue; }
+  get files() {
+    if (!this._files) {
+      let files = walkSync(this._path, { globs: ['**/*.hbs'], directories: false })
+          .filter(path => !path.startsWith('tmp'))
+          .filter(path => !path.startsWith('node_modules'));
+      this._files = files;
+    }
 
+    return this._files;
+  }
+
+  populate() {
+    for (let relativePath of this.files) {
       let fullPath = path.join(this._path, relativePath);
       let contents = fs.readFileSync(fullPath, { encoding: 'utf-8' });
 
