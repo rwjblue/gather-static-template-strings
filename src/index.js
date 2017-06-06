@@ -67,12 +67,18 @@ module.exports = class CollectStrings {
       let fullPath = path.join(this._path, relativePath);
       let contents = fs.readFileSync(fullPath, { encoding: 'utf-8' });
 
-      compiler.precompile(contents, {
-        meta: { moduleName: relativePath },
-        plugins: {
-          ast: [buildStringCollector(this)]
-        }
-      });
+      try {
+        compiler.precompile(contents, {
+          moduleName: relativePath,
+          meta: { moduleName: relativePath },
+          plugins: {
+            ast: [buildStringCollector(this)]
+          }
+        });
+
+      } catch(e) {
+        // do nothing
+      }
 
       this._fileProcessed(relativePath);
     }

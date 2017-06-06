@@ -89,6 +89,16 @@ describe('StringCollector', function(hooks) {
     assert.deepEqual(instance.strings, { 'hi!': 1 });
   });
 
+  it('does not crash on invalid template contents', function(assert) {
+    process.chdir(input.path());
+    input.write({ 'foo.hbs': '<p>' });
+
+    let instance = new StringCollector({ mangle: false });
+    instance.populate();
+
+    assert.deepEqual(instance.strings, { });
+  });
+
   it('calls fileProcessed callback for each file', function(assert) {
     process.chdir(input.path());
 
