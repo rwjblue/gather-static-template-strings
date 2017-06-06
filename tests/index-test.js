@@ -45,6 +45,30 @@ describe('StringCollector', function(hooks) {
     });
   });
 
+  it('should not capture strings from tmp', function(assert) {
+    input.write({
+      'tmp': {
+        'derp.hbs': 'derp'
+      },
+      'foo': {
+        'bar': {
+          'baz.hbs': 'derp',
+          'qux.hbs': 'derp'
+        }
+      }
+    });
+
+    let instance = new StringCollector({
+      path: input.path()
+    });
+
+    instance.populate();
+
+    assert.mangledStringsEqual(instance.strings, {
+      'derp': 2
+    });
+  });
+
   it('defaults to process.cwd', function(assert) {
     process.chdir(input.path());
     input.write({ 'foo.hbs': 'hi!' });

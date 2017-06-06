@@ -50,8 +50,11 @@ module.exports = class CollectStrings {
   }
 
   populate() {
-    let files = walkSync(this._path, { globs: ['**/*.hbs' ] });
+    let files = walkSync(this._path, { globs: ['**/*.hbs'], directories: false });
     for (let relativePath of files) {
+      if (relativePath.startsWith('tmp')) { continue; }
+      if (relativePath.startsWith('node_modules')) { continue; }
+
       let fullPath = path.join(this._path, relativePath);
       let contents = fs.readFileSync(fullPath, { encoding: 'utf-8' });
 
