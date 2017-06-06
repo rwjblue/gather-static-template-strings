@@ -5,17 +5,20 @@
   "main": "index.js",
   "author": "Robert Jackson <me@rwjblue.com>",
   "license": "MIT",
+  "bin": "./src/cli.js",
   "scripts": {
     "test": "qunit tests/**/*-test.js"
   },
   "devDependencies": {
     "broccoli-test-helper": "^1.1.0",
     "co": "^4.6.0",
+    "execa": "^0.6.3",
     "qunit-eslint": "^1.0.0",
     "qunitjs": "^2.3.3"
   },
   "dependencies": {
     "@glimmer/compiler": "^0.24.0-beta.4",
-    "walk-sync": "^0.3.2"
+    "walk-sync": "^0.3.2",
+    "yargs": "^8.0.1"
   }
 }
