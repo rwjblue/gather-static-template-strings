@@ -39,7 +39,7 @@ module.exports = class CollectStrings {
     let options = _options || {};
     this._path = options.path || process.cwd();
     this._mangle = 'mangle' in options ? options.mangle : true;
-    this.options = options;
+    this._fileProcessed = options.fileProcessed || function() {};
 
     this._map = Object.create(null);
     this._files = null;
@@ -55,6 +55,7 @@ module.exports = class CollectStrings {
       let files = walkSync(this._path, { globs: ['**/*.hbs'], directories: false })
           .filter(path => !path.startsWith('tmp'))
           .filter(path => !path.startsWith('node_modules'));
+
       this._files = files;
     }
 
@@ -72,6 +73,8 @@ module.exports = class CollectStrings {
           ast: [buildStringCollector(this)]
         }
       });
+
+      this._fileProcessed(relativePath);
     }
   }
 

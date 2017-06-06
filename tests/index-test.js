@@ -88,4 +88,23 @@ describe('StringCollector', function(hooks) {
 
     assert.deepEqual(instance.strings, { 'hi!': 1 });
   });
+
+  it('calls fileProcessed callback for each file', function(assert) {
+    process.chdir(input.path());
+
+    input.write({
+      'foo.hbs': 'hi!',
+      'bar.hbs': 'derp'
+    });
+
+    let instance = new StringCollector({
+      mangle: false,
+      fileProcessed(path) { assert.step(path); }
+    });
+    instance.populate();
+
+
+    assert.verifySteps(['bar.hbs', 'foo.hbs']);
+    assert.deepEqual(instance.strings, { 'hi!': 1, 'derp': 1 });
+  });
 });
