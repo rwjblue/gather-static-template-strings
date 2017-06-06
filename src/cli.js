@@ -13,7 +13,7 @@ const argv = require('yargs')
 
 const StringCollector = require('./index');
 
-let fs = require('fs');
+const fs = require('fs');
 
 let collector = new StringCollector({
   path: argv.path,
