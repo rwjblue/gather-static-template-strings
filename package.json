@@ -4,5 +4,12 @@
   "description": "Generate a list of static strings in application templates.",
   "main": "index.js",
   "author": "Robert Jackson <me@rwjblue.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "qunit tests/**/*-test.js"
+  },
+  "devDependencies": {
+    "qunit-eslint": "^1.0.0",
+    "qunitjs": "^2.3.3"
+  }
 }
