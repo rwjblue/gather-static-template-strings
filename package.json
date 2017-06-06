@@ -11,5 +11,9 @@
   "devDependencies": {
     "qunit-eslint": "^1.0.0",
     "qunitjs": "^2.3.3"
+  },
+  "dependencies": {
+    "@glimmer/compiler": "^0.24.0-beta.4",
+    "walk-sync": "^0.3.2"
   }
 }
