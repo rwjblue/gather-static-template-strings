@@ -6,37 +6,26 @@ const crypto = require('crypto');
 const walkSync = require('walk-sync');
 const compiler = require('@glimmer/compiler');
 
-class StringCounter {
-  constructor() {
-    this.map = Object.create(null);
-  }
-
-  see(string) {
-    let count = this.map[string] || 0;
-    this.map[string] = count + 1;
-  }
-}
-
 function buildStringCollector(counter)  {
  return class StringCollectorASTPlugin {
    transform(ast) {
      this.syntax.traverse(ast, {
        ElementNode(node) {
-         counter.see(node.tag);
+         counter.incrementStringCount(node.tag);
        },
        TextNode(node) {
-         counter.see(node.chars);
+         counter.incrementStringCount(node.chars);
        },
        PathExpression(node) {
          for (let part of node.parts) {
-           counter.see(part);
+           counter.incrementStringCount(part);
          }
        },
        AttrNode(node) {
-         counter.see(node.name);
+         counter.incrementStringCount(node.name);
        },
       HashPair(node) {
-        counter.see(node.key);
+        counter.incrementStringCount(node.key);
       }
      });
 
@@ -52,7 +41,12 @@ module.exports = class CollectStrings {
     this._mangle = 'mangle' in options ? options.mangle : true;
     this.options = options;
 
-    this._counter = new StringCounter();
+    this._map = Object.create(null);
+  }
+
+  incrementStringCount(string) {
+    let count = this._map[string] || 0;
+    this._map[string] = count + 1;
   }
 
   populate() {
@@ -64,14 +58,14 @@ module.exports = class CollectStrings {
       compiler.precompile(contents, {
         meta: { moduleName: relativePath },
         plugins: {
-          ast: [buildStringCollector(this._counter)]
+          ast: [buildStringCollector(this)]
         }
       });
     }
   }
 
   get strings() {
-    let map = this._counter.map;
+    let map = this._map;
 
     if (this._mangle) {
       let mangledMap = Object.create(null);
