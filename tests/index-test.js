@@ -20,6 +20,8 @@ describe('StringCollector', function(hooks) {
 
   hooks.afterEach(function() {
     process.chdir(root);
+
+    return input.dispose();
   });
 
   it('should capture strings across templates', function(assert) {
