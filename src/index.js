@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
+const hash = require('./utils/hash');
 const walkSync = require('walk-sync');
 const compiler = require('@glimmer/compiler');
 
@@ -90,7 +90,7 @@ module.exports = class CollectStrings {
     if (this._mangle) {
       let mangledMap = Object.create(null);
       for (let key in map) {
-        let mangledKey = crypto.createHash('sha256').update(key).digest('hex');
+        let mangledKey = hash(key);
         mangledMap[mangledKey] = map[key];
       }
       return mangledMap;

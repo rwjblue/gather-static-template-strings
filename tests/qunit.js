@@ -1,10 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
-
-function hashString(string) {
-  return crypto.createHash('sha256').update(string).digest('hex');
-}
+const hashString = require('../src/utils/hash');
 
 QUnit.assert.mangledStringsEqual = function(mangled, expected) {
   let expectedKeys = Object.keys(expected);
