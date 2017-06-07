@@ -67,16 +67,23 @@ module.exports = class ProcessFindings {
 
   get result() {
     let data = this._data;
-    let result = Object.create(null);
+    let results = [];
 
     for (let key in data) {
       let item = data[key];
 
       if (item.consumers >= this._consumerThreshold) {
-        result[item.value] = item.count;
+        results.push(item);
       }
     }
 
-    return result;
+    results.sort((a, b) => b.count - a.count);
+
+    let final = Object.create(null);
+    for (let item of results) {
+      final[item.value] = item.count;
+    }
+
+    return final;
   }
 };

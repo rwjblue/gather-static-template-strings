@@ -83,4 +83,27 @@ describe('ProcessFindings', function(hooks) {
       snark: 6
     });
   });
+
+  it('sorts results by count', function(assert) {
+    input.write({
+      mangled: {
+        '005.json': generateHashedFileContent({ derp: 1 }),
+        '004.json': generateHashedFileContent({ derp: 2, huzzah: 4 }),
+        '003.json': generateHashedFileContent({ derp: 3, huzzah: 8, snark: 1 }),
+        '002.json': generateHashedFileContent({ derp: 4, huzzah: 12, snark: 2, derk: 1 }),
+        '001.json': generateHashedFileContent({ derp: 5, huzzah: 16, snark: 3, derk: 2, kit: 1 })
+      },
+      'unmangled.json': JSON.stringify({ derp: 1, huzzah: 1, snark: 1, derk: 1, kit: 1 })
+    });
+
+    let instance = new ProcessFindings({
+      mangledDir: input.path('mangled'),
+      unmangledPath: input.path('unmangled.json'),
+      consumerThreshold: 3
+    });
+
+    instance.discover();
+
+    assert.deepEqual(Object.keys(instance.result), ['huzzah', 'derp', 'snark']);
+  });
 });
