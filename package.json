@@ -9,6 +9,9 @@
   "scripts": {
     "test": "qunit tests/**/*-test.js"
   },
+  "files": {
+    "src"
+  },
   "devDependencies": {
     "broccoli-test-helper": "^1.1.0",
     "co": "^4.6.0",
