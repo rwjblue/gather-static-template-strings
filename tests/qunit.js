@@ -1,6 +1,5 @@
 'use strict';
 
-const crypto = require('crypto');
 const hashString = require('../src/utils/hash');
 
 QUnit.assert.mangledStringsEqual = function(mangled, expected) {
