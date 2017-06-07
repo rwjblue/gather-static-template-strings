@@ -57,7 +57,7 @@ require('yargs')
       });
 
       instance.discover();
-      let jsonOutput = JSON.stringify(instance.result, null, 2);
+      let jsonOutput = instance.result;
       if (argv.outputPath) {
         fs.writeFileSync(argv.outputPath, jsonOutput, { encoding: 'utf-8' });
       } else {

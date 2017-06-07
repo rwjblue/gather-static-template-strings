@@ -79,11 +79,13 @@ module.exports = class ProcessFindings {
 
     results.sort((a, b) => b.count - a.count);
 
-    let final = Object.create(null);
+    let result = '{';
     for (let item of results) {
-      final[item.value] = item.count;
+      result += `\n  ${JSON.stringify(item.value)}: ${item.count},`;
     }
 
-    return final;
+    result = result.slice(0, -1) + `\n}`;
+
+    return result;
   }
 };

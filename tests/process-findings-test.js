@@ -43,7 +43,9 @@ describe('ProcessFindings', function(hooks) {
 
     instance.discover();
 
-    assert.deepEqual(instance.result, {
+    let parsedResult = JSON.parse(instance.result);
+
+    assert.deepEqual(parsedResult, {
       derp: 6
     });
   });
@@ -68,7 +70,9 @@ describe('ProcessFindings', function(hooks) {
 
     instance.discover();
 
-    assert.deepEqual(instance.result, {
+    let parsedResult = JSON.parse(instance.result);
+
+    assert.deepEqual(parsedResult, {
       derp: 15,
       huzzah: 10,
       snark: 6
@@ -95,6 +99,8 @@ describe('ProcessFindings', function(hooks) {
 
     instance.discover();
 
-    assert.deepEqual(Object.keys(instance.result), ['huzzah', 'derp', 'snark']);
+    let parsedResult = JSON.parse(instance.result);
+
+    assert.deepEqual(Object.keys(parsedResult), ['huzzah', 'derp', 'snark']);
   });
 });
