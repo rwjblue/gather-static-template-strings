@@ -3,7 +3,8 @@
 const co = require('co');
 const BroccoliTestHelper = require('broccoli-test-helper');
 const ProcessFindings = require('../src/process-findings');
-const hashString = require('../src/utils/hash');
+const helpers = require('./helpers');
+const generateHashedFileContent = helpers.generateHashedFileContent;
 
 const QUnit = require('./qunit');
 const describe = QUnit.module;
@@ -11,16 +12,6 @@ const it = QUnit.test; // eslint-disable-line
 const todo = QUnit.todo; // eslint-disable-line
 
 const root = process.cwd();
-
-function generateHashedFileContent(map) {
-  let mangledMap = Object.create(null);
-  for (let key in map) {
-    let mangledKey = hashString(key);
-    mangledMap[mangledKey] = map[key];
-  }
-
-  return JSON.stringify(mangledMap);
-}
 
 describe('ProcessFindings', function(hooks) {
   let input;
