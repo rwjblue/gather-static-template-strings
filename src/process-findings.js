@@ -5,17 +5,31 @@ const path = require('path');
 const walkSync = require('walk-sync');
 const hash = require('./utils/hash');
 
+class StringData {
+  constructor(value) {
+    this.value = value;
+    this.consumers = 0;
+    this.count = 0;
+  }
+
+  add(count) {
+    this.consumers++;
+    this.count += count;
+  }
+}
+
 module.exports = class ProcessFindings {
   constructor(options) {
     this._mangledDir = options.mangledDir;
     this._unmangledPath = options.unmangledPath;
+    this._consumerThreshold = options.consumerThreshold || 3;
 
     this._knownStringsMap = Object.create(null);
   }
 
   discover() {
     this._buildHashToPlainStringMap();
-    this._map = Object.create(null);
+    this._data = Object.create(null);
 
     let files = walkSync(this._mangledDir);
     for (let file of files) {
@@ -42,11 +56,27 @@ module.exports = class ProcessFindings {
       let unmangledKey = this._knownStringsMap[key];
       if (!unmangledKey) { continue; }
 
-      this._map[unmangledKey] = (this._map[unmangledKey] || 0) + mangled[key];
+      let data = this._data[unmangledKey];
+      if (!data) {
+        data = this._data[unmangledKey] = new StringData(unmangledKey);
+      }
+
+      data.add(mangled[key]);
     }
   }
 
   get result() {
-    return this._map;
+    let data = this._data;
+    let result = Object.create(null);
+
+    for (let key in data) {
+      let item = data[key];
+
+      if (item.consumers >= this._consumerThreshold) {
+        result[item.value] = item.count;
+      }
+    }
+
+    return result;
   }
 };
