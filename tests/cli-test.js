@@ -38,49 +38,51 @@ describe('StringCollector CLI', function(hooks) {
     return input.dispose();
   });
 
-  it('should run by default', co.wrap(function* (assert) {
-    process.chdir(input.path());
+  describe('gather', function() {
+    it('should run by default', co.wrap(function* (assert) {
+      process.chdir(input.path());
 
-    input.write({
-      'foo.hbs': 'hi!'
-    });
+      input.write({
+        'foo.hbs': 'hi!'
+      });
 
-    let output = yield run();
-    let parsedOutput = JSON.parse(output.stdout);
+      let output = yield run();
+      let parsedOutput = JSON.parse(output.stdout);
 
-    assert.mangledStringsEqual(parsedOutput, {
-      'hi!': 1
-    });
-  }));
+      assert.mangledStringsEqual(parsedOutput, {
+        'hi!': 1
+      });
+    }));
 
-  it('allows --path option ', co.wrap(function* (assert) {
-    input.write({
-      'foo.hbs': 'hi!'
-    });
+    it('allows --path option ', co.wrap(function* (assert) {
+      input.write({
+        'foo.hbs': 'hi!'
+      });
 
-    let output = yield run({ '--path': input.path() });
-    let parsedOutput = JSON.parse(output.stdout);
+      let output = yield run({ '--path': input.path() });
+      let parsedOutput = JSON.parse(output.stdout);
 
-    assert.mangledStringsEqual(parsedOutput, {
-      'hi!': 1
-    });
-  }));
+      assert.mangledStringsEqual(parsedOutput, {
+        'hi!': 1
+      });
+    }));
 
-  it('allows --output-path option ', co.wrap(function* (assert) {
-    input.write({
-      'foo.hbs': 'hi!'
-    });
+    it('allows --output-path option ', co.wrap(function* (assert) {
+      input.write({
+        'foo.hbs': 'hi!'
+      });
 
-    let output = yield BroccoliTestHelper.createTempDir();
-    let outputJSONPath = output.path('out.json');
-    yield run({ '--path': input.path(), '--output-path': outputJSONPath });
+      let output = yield BroccoliTestHelper.createTempDir();
+      let outputJSONPath = output.path('out.json');
+      yield run({ '--path': input.path(), '--output-path': outputJSONPath });
 
-    let parsedOutput = require(outputJSONPath);
+      let parsedOutput = require(outputJSONPath);
 
-    assert.mangledStringsEqual(parsedOutput, {
-      'hi!': 1
-    });
+      assert.mangledStringsEqual(parsedOutput, {
+        'hi!': 1
+      });
 
-    yield output.dispose();
-  }));
+      yield output.dispose();
+    }));
+  });
 });
