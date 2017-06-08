@@ -5,16 +5,42 @@ const path = require('path');
 const walkSync = require('walk-sync');
 const hash = require('./utils/hash');
 
+class Consumer {
+  constructor(path) {
+    this.path = path;
+    this.total = 0;
+  }
+}
+
 class StringData {
   constructor(value) {
     this.value = value;
-    this.consumers = 0;
-    this.count = 0;
+    this.references = [];
+    this._consumers = [];
   }
 
-  add(count) {
-    this.consumers++;
-    this.count += count;
+  add(count, consumer) {
+    this.references.push([count, consumer]);
+    if (!this._consumers.includes(consumer)) {
+      this._consumers.push(consumer);
+    }
+  }
+
+  get consumers() {
+    return this._consumers.length;
+  }
+
+  get count() {
+    if (!this._count) {
+      let count = 0;
+      for (let reference of this.references) {
+        count += reference[0] / reference[1].total * 100;
+      }
+
+      this._count = count;
+    }
+
+    return this._count;
   }
 }
 
@@ -23,8 +49,10 @@ module.exports = class ProcessFindings {
     this._mangledDir = options.mangledDir;
     this._unmangledPath = options.unmangledPath;
     this._consumerThreshold = options.consumerThreshold || 3;
+    this._appWeighted = options.weighted === 'app';
 
     this._knownStringsMap = Object.create(null);
+    this._totalFiles = 0;
   }
 
   discover() {
@@ -35,6 +63,8 @@ module.exports = class ProcessFindings {
     for (let file of files) {
       this._processFile(file);
     }
+
+    this._totalFiles = files.length;
   }
 
   _buildHashToPlainStringMap() {
@@ -51,6 +81,7 @@ module.exports = class ProcessFindings {
     let fullPath = path.join(this._mangledDir, relativePath);
     let mangledContents = fs.readFileSync(fullPath, { encoding: 'utf-8' });
     let mangled = JSON.parse(mangledContents);
+    let consumer = new Consumer(relativePath);
 
     for (let key in mangled) {
       let unmangledKey = this._knownStringsMap[key];
@@ -61,7 +92,9 @@ module.exports = class ProcessFindings {
         data = this._data[unmangledKey] = new StringData(unmangledKey);
       }
 
-      data.add(mangled[key]);
+      let count = mangled[key];
+      data.add(count, consumer);
+      consumer.total += count;
     }
   }
 
@@ -81,7 +114,7 @@ module.exports = class ProcessFindings {
 
     let result = '{';
     for (let item of results) {
-      result += `\n  ${JSON.stringify(item.value)}: ${item.count},`;
+      result += `\n  ${JSON.stringify(item.value)}: ${(item.count / this._totalFiles).toFixed(3)},`;
     }
 
     result = result.slice(0, -1) + `\n}`;

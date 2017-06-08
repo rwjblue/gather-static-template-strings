@@ -118,7 +118,7 @@ describe('StringCollector CLI', function(hooks) {
       let parsedOutput = JSON.parse(result.stdout);
 
       assert.deepEqual(parsedOutput, {
-        derp: 6
+        derp: 100
       });
     }));
 
@@ -135,7 +135,7 @@ describe('StringCollector CLI', function(hooks) {
       let parsedOutput = require(outputJSONPath);
 
       assert.deepEqual(parsedOutput, {
-        derp: 6
+        derp: 100
       });
 
       yield output.dispose();
