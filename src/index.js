@@ -7,31 +7,29 @@ const walkSync = require('walk-sync');
 const compiler = require('@glimmer/compiler');
 
 function buildStringCollector(counter)  {
- return class StringCollectorASTPlugin {
-   transform(ast) {
-     this.syntax.traverse(ast, {
-       ElementNode(node) {
-         counter.incrementStringCount(node.tag);
-       },
-       TextNode(node) {
-         counter.incrementStringCount(node.chars);
-       },
-       PathExpression(node) {
-         for (let part of node.parts) {
-           counter.incrementStringCount(part);
-         }
-       },
-       AttrNode(node) {
-         counter.incrementStringCount(node.name);
-       },
+  return () => ({
+    name: 'string-collector',
+
+    visitor: {
+      ElementNode(node) {
+        counter.incrementStringCount(node.tag);
+      },
+      TextNode(node) {
+        counter.incrementStringCount(node.chars);
+      },
+      PathExpression(node) {
+        for (let part of node.parts) {
+          counter.incrementStringCount(part);
+        }
+      },
+      AttrNode(node) {
+        counter.incrementStringCount(node.name);
+      },
       HashPair(node) {
         counter.incrementStringCount(node.key);
       }
-     });
-
-     return ast;
-   }
- };
+    }
+  });
 }
 
 module.exports = class CollectStrings {
