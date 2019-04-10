@@ -89,6 +89,16 @@ describe('StringCollector', function(hooks) {
     assert.deepEqual(instance.strings, { 'hi!': 1 });
   });
 
+  it('identifies strings within ambiguous contextual component invocations', function(assert) {
+    process.chdir(input.path());
+    input.write({ 'foo.hbs': '{{#foo-bar as |bar|}}{{#bar.baz}}Hi!{{/bar.baz}}{{/foo-bar}}'});
+
+    let instance = new StringCollector({ mangle: false });
+    instance.populate();
+
+    assert.equal(instance.strings['Hi!'], 1);
+  });
+
   it('does not crash on invalid template contents', function(assert) {
     process.chdir(input.path());
     input.write({ 'foo.hbs': '<p>' });
