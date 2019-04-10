@@ -1,8 +1,6 @@
 language: node_js
 node_js:
-  - "4"
-  - "6"
-  - "stable"
+  - "10"
 
 cache:
   yarn: true
@@ -11,6 +9,22 @@ branches:
   only:
     - master
 
-before_script:
-  # ensure we are testing against latest versions of all deps when using Yarn
-  - yarn upgrade
+jobs:
+  fail_fast: true
+
+  include:
+    # runs linting and tests with current locked deps
+    - name: "Locked Dependencies: Node 6"
+      node_js: "6"
+
+    - name: "Locked Dependencies: Node 8"
+      node_js: "8"
+
+    - name: "Locked Dependencies: Node 10"
+      script:
+        - yarn test
+        - yarn lint:js
+
+    - name: "Floating Dependencies: Node 10"
+      install:
+        - yarn install --no-lockfile --non-interactive
