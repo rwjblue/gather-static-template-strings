@@ -21,6 +21,9 @@ jobs:
       node_js: "8"
 
     - name: "Locked Dependencies: Node 10"
+      script:
+        - yarn test
+        - yarn lint:js
 
     - name: "Floating Dependencies: Node 10"
       install:
