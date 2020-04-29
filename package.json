@@ -14,14 +14,14 @@
     "src"
   ],
   "devDependencies": {
-    "broccoli-test-helper": "^1.1.0",
+    "broccoli-test-helper": "^2.0.0",
     "eslint": "^5.16.0",
     "execa": "^0.6.3",
-    "qunitjs": "^2.3.3"
+    "qunit": "^2.9.3"
   },
   "dependencies": {
     "@glimmer/syntax": "^0.51.1",
-    "walk-sync": "^0.3.2",
-    "yargs": "^8.0.1"
+    "walk-sync": "^2.1.0",
+    "yargs": "^15.3.1"
   }
 }
