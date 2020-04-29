@@ -15,7 +15,7 @@
   ],
   "devDependencies": {
     "broccoli-test-helper": "^2.0.0",
-    "eslint": "^5.16.0",
+    "eslint": "^6.8.0",
     "execa": "^0.6.3",
     "qunit": "^2.9.3"
   },
