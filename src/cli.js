@@ -3,7 +3,7 @@
 
 const fs = require('fs');
 const name = require('../package').name;
-const StringCollector = require('./index');
+const Collector = require('./index');
 const ProcessFindings = require('./process-findings');
 
 require('yargs')
@@ -14,6 +14,11 @@ require('yargs')
     builder(yargs) {
       return yargs
         .usage(`${name} <options>`)
+        .option('visitor-path', {
+          type: 'string',
+          describe: 'the path to the visitor to use for gathering',
+          required: true,
+        })
         .option('path', { type: 'string', describe: 'directory to process' })
         .option('mangle', {
           type: 'boolean',
@@ -27,8 +32,9 @@ require('yargs')
         .default('path', () => process.cwd(), '.');
     },
     handler(argv) {
-      let collector = new StringCollector({
+      let collector = new Collector({
         path: argv.path,
+        visitorPath: argv.visitorPath,
         mangle: argv.mangle,
       });
 

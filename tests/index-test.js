@@ -2,11 +2,11 @@
 
 const { createTempDir } = require('broccoli-test-helper');
 const { mangle } = require('./helpers');
-const StringCollector = require('../src');
+const Collector = require('../src');
 
 const root = process.cwd();
 
-describe('StringCollector', function () {
+describe('Collector', function () {
   let input;
 
   beforeEach(async function () {
@@ -19,6 +19,37 @@ describe('StringCollector', function () {
     await input.dispose();
   });
 
+  it('can provide a custom visitor path', function () {
+    input.write({
+      'visitor.js': `module.exports = function(increment) {
+        return {
+          MustacheStatement(node) {
+            increment(node.path.original);
+          }
+        };
+      };`,
+      foo: {
+        bar: {
+          'baz.hbs': '{{derp}}lol',
+          'qux.hbs': '{{derp}}hihihihi',
+        },
+      },
+    });
+
+    let instance = new Collector({
+      visitorPath: input.path('visitor.js'),
+      path: input.path(),
+    });
+
+    instance.populate();
+
+    expect(instance.strings).toEqual(
+      mangle({
+        derp: 2,
+      })
+    );
+  });
+
   it('should capture strings across templates', function () {
     input.write({
       foo: {
@@ -29,7 +60,8 @@ describe('StringCollector', function () {
       },
     });
 
-    let instance = new StringCollector({
+    let instance = new Collector({
+      visitorPath: require.resolve('./string-collector'),
       path: input.path(),
     });
 
@@ -55,7 +87,8 @@ describe('StringCollector', function () {
       },
     });
 
-    let instance = new StringCollector({
+    let instance = new Collector({
+      visitorPath: require.resolve('./string-collector'),
       path: input.path(),
     });
 
@@ -72,7 +105,9 @@ describe('StringCollector', function () {
     process.chdir(input.path());
     input.write({ 'foo.hbs': 'hi!' });
 
-    let instance = new StringCollector();
+    let instance = new Collector({
+      visitorPath: require.resolve('./string-collector'),
+    });
     instance.populate();
 
     expect(instance.strings).toEqual(mangle({ 'hi!': 1 }));
@@ -82,7 +117,10 @@ describe('StringCollector', function () {
     process.chdir(input.path());
     input.write({ 'foo.hbs': 'hi!' });
 
-    let instance = new StringCollector({ mangle: false });
+    let instance = new Collector({
+      visitorPath: require.resolve('./string-collector'),
+      mangle: false,
+    });
     instance.populate();
 
     expect(instance.strings).toEqual({ 'hi!': 1 });
@@ -94,7 +132,10 @@ describe('StringCollector', function () {
       'foo.hbs': '{{#foo-bar as |bar|}}{{#bar.baz}}Hi!{{/bar.baz}}{{/foo-bar}}',
     });
 
-    let instance = new StringCollector({ mangle: false });
+    let instance = new Collector({
+      visitorPath: require.resolve('./string-collector'),
+      mangle: false,
+    });
     instance.populate();
 
     expect(instance.strings['Hi!']).toEqual(1);
@@ -104,7 +145,10 @@ describe('StringCollector', function () {
     process.chdir(input.path());
     input.write({ 'foo.hbs': '<p>' });
 
-    let instance = new StringCollector({ mangle: false });
+    let instance = new Collector({
+      visitorPath: require.resolve('./string-collector'),
+      mangle: false,
+    });
     instance.populate();
 
     expect(instance.strings).toEqual({});
@@ -119,7 +163,8 @@ describe('StringCollector', function () {
       'bar.hbs': 'derp',
     });
 
-    let instance = new StringCollector({
+    let instance = new Collector({
+      visitorPath: require.resolve('./string-collector'),
       mangle: false,
       fileProcessed(path) {
         steps.push(path);
