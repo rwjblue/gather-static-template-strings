@@ -21,7 +21,7 @@
     "qunitjs": "^2.3.3"
   },
   "dependencies": {
-    "@glimmer/compiler": "^0.40.0",
+    "@glimmer/syntax": "^0.51.1",
     "walk-sync": "^0.3.2",
     "yargs": "^8.0.1"
   }

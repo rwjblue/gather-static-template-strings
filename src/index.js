@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const hash = require('./utils/hash');
 const walkSync = require('walk-sync');
-const compiler = require('@glimmer/compiler');
+const { preprocess, traverse } = require('@glimmer/syntax');
 
 function transformDotComponentInvocation(env) {
   let builders = env.syntax.builders;
@@ -49,29 +49,25 @@ function transformDotComponentInvocation(env) {
 }
 
 function buildStringCollector(counter)  {
-  return () => ({
-    name: 'string-collector',
-
-    visitor: {
-      ElementNode(node) {
-        counter.incrementStringCount(node.tag);
-      },
-      TextNode(node) {
-        counter.incrementStringCount(node.chars);
-      },
-      PathExpression(node) {
-        for (let part of node.parts) {
-          counter.incrementStringCount(part);
-        }
-      },
-      AttrNode(node) {
-        counter.incrementStringCount(node.name);
-      },
-      HashPair(node) {
-        counter.incrementStringCount(node.key);
+  return {
+    ElementNode(node) {
+      counter.incrementStringCount(node.tag);
+    },
+    TextNode(node) {
+      counter.incrementStringCount(node.chars);
+    },
+    PathExpression(node) {
+      for (let part of node.parts) {
+        counter.incrementStringCount(part);
       }
+    },
+    AttrNode(node) {
+      counter.incrementStringCount(node.name);
+    },
+    HashPair(node) {
+      counter.incrementStringCount(node.key);
     }
-  });
+  };
 }
 
 module.exports = class CollectStrings {
@@ -108,17 +104,10 @@ module.exports = class CollectStrings {
       let contents = fs.readFileSync(fullPath, { encoding: 'utf-8' });
 
       try {
-        compiler.precompile(contents, {
-          moduleName: relativePath,
-          meta: { moduleName: relativePath },
-          plugins: {
-            ast: [
-              transformDotComponentInvocation,
-              buildStringCollector(this)
-            ]
-          }
+        let ast = preprocess(contents, {
+          mode: 'codemod',
         });
-
+        traverse(ast, buildStringCollector(this));
       } catch(e) {
         // do nothing
       }
