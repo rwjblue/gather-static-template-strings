@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-const co = require('co');
 const BroccoliTestHelper = require('broccoli-test-helper');
 const execa = require('execa');
 const QUnit = require('./qunit');
@@ -38,9 +37,9 @@ describe('StringCollector CLI', function(hooks) {
     return execa('node', args);
   }
 
-  hooks.beforeEach(co.wrap(function* () {
-    input = yield BroccoliTestHelper.createTempDir();
-  }));
+  hooks.beforeEach(async function () {
+    input = await BroccoliTestHelper.createTempDir();
+  });
 
   hooks.afterEach(function() {
     process.chdir(root);
@@ -49,42 +48,42 @@ describe('StringCollector CLI', function(hooks) {
   });
 
   describe('gather', function() {
-    it('should run by default', co.wrap(function* (assert) {
+    it('should run by default', async function (assert) {
       process.chdir(input.path());
 
       input.write({
         'foo.hbs': 'hi!'
       });
 
-      let output = yield run();
+      let output = await run();
       let parsedOutput = JSON.parse(output.stdout);
 
       assert.mangledStringsEqual(parsedOutput, {
         'hi!': 1
       });
-    }));
+    });
 
-    it('allows --path option ', co.wrap(function* (assert) {
+    it('allows --path option ', async function (assert) {
       input.write({
         'foo.hbs': 'hi!'
       });
 
-      let output = yield run({ '--path': input.path() });
+      let output = await run({ '--path': input.path() });
       let parsedOutput = JSON.parse(output.stdout);
 
       assert.mangledStringsEqual(parsedOutput, {
         'hi!': 1
       });
-    }));
+    });
 
-    it('allows --output-path option ', co.wrap(function* (assert) {
+    it('allows --output-path option ', async function (assert) {
       input.write({
         'foo.hbs': 'hi!'
       });
 
-      let output = yield BroccoliTestHelper.createTempDir();
+      let output = await BroccoliTestHelper.createTempDir();
       let outputJSONPath = output.path('out.json');
-      yield run({ '--path': input.path(), '--output-path': outputJSONPath });
+      await run({ '--path': input.path(), '--output-path': outputJSONPath });
 
       let parsedOutput = require(outputJSONPath);
 
@@ -92,8 +91,8 @@ describe('StringCollector CLI', function(hooks) {
         'hi!': 1
       });
 
-      yield output.dispose();
-    }));
+      await output.dispose();
+    });
   });
 
   describe('process', function(hooks) {
@@ -109,8 +108,8 @@ describe('StringCollector CLI', function(hooks) {
     });
 
 
-    it('emits to stdout by default', co.wrap(function* (assert) {
-      let result = yield run('process', {
+    it('emits to stdout by default', async function (assert) {
+      let result = await run('process', {
         '--mangled-dir': input.path('mangled'),
         '--unmangled-file': input.path('unmangled.json')
       });
@@ -120,13 +119,13 @@ describe('StringCollector CLI', function(hooks) {
       assert.deepEqual(parsedOutput, {
         derp: 100
       });
-    }));
+    });
 
-    it('emits to file with --output-path option ', co.wrap(function* (assert) {
-      let output = yield BroccoliTestHelper.createTempDir();
+    it('emits to file with --output-path option ', async function (assert) {
+      let output = await BroccoliTestHelper.createTempDir();
       let outputJSONPath = output.path('out.json');
 
-      yield run('process', {
+      await run('process', {
         '--mangled-dir': input.path('mangled'),
         '--unmangled-file': input.path('unmangled.json'),
         '--output-path': outputJSONPath
@@ -138,7 +137,7 @@ describe('StringCollector CLI', function(hooks) {
         derp: 100
       });
 
-      yield output.dispose();
-    }));
+      await output.dispose();
+    });
   });
 });

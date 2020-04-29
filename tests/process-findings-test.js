@@ -1,6 +1,5 @@
 'use strict';
 
-const co = require('co');
 const BroccoliTestHelper = require('broccoli-test-helper');
 const ProcessFindings = require('../src/process-findings');
 const helpers = require('./helpers');
@@ -16,9 +15,9 @@ const root = process.cwd();
 describe('ProcessFindings', function(hooks) {
   let input;
 
-  hooks.beforeEach(co.wrap(function* () {
-    input = yield BroccoliTestHelper.createTempDir();
-  }));
+  hooks.beforeEach(async function () {
+    input = await BroccoliTestHelper.createTempDir();
+  });
 
   hooks.afterEach(function() {
     process.chdir(root);
