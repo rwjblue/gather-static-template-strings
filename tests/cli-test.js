@@ -1,19 +1,13 @@
 'use strict';
 
 const path = require('path');
-const BroccoliTestHelper = require('broccoli-test-helper');
+const { createTempDir } = require('broccoli-test-helper');
 const execa = require('execa');
-const QUnit = require('./qunit');
-const helpers = require('./helpers');
-const generateHashedFileContent = helpers.generateHashedFileContent;
-
-const describe = QUnit.module;
-const it = QUnit.test; // eslint-disable-line
-const todo = QUnit.todo; // eslint-disable-line
+const { generateHashedFileContent, mangle } = require('./helpers');
 
 const root = process.cwd();
 
-describe('StringCollector CLI', function (hooks) {
+describe('StringCollector CLI', function () {
   let input;
 
   function run() {
@@ -37,18 +31,18 @@ describe('StringCollector CLI', function (hooks) {
     return execa(process.execPath, args);
   }
 
-  hooks.beforeEach(async function () {
-    input = await BroccoliTestHelper.createTempDir();
+  beforeEach(async function () {
+    input = await createTempDir();
   });
 
-  hooks.afterEach(function () {
+  afterEach(async function () {
     process.chdir(root);
 
-    return input.dispose();
+    await input.dispose();
   });
 
   describe('gather', function () {
-    it('should run by default', async function (assert) {
+    it('should run by default', async function () {
       process.chdir(input.path());
 
       input.write({
@@ -58,12 +52,10 @@ describe('StringCollector CLI', function (hooks) {
       let output = await run();
       let parsedOutput = JSON.parse(output.stdout);
 
-      assert.mangledStringsEqual(parsedOutput, {
-        'hi!': 1,
-      });
+      expect(parsedOutput).toEqual(mangle({ 'hi!': 1 }));
     });
 
-    it('allows --path option ', async function (assert) {
+    it('allows --path option ', async function () {
       input.write({
         'foo.hbs': 'hi!',
       });
@@ -71,32 +63,28 @@ describe('StringCollector CLI', function (hooks) {
       let output = await run({ '--path': input.path() });
       let parsedOutput = JSON.parse(output.stdout);
 
-      assert.mangledStringsEqual(parsedOutput, {
-        'hi!': 1,
-      });
+      expect(parsedOutput).toEqual(mangle({ 'hi!': 1 }));
     });
 
-    it('allows --output-path option ', async function (assert) {
+    it('allows --output-path option ', async function () {
       input.write({
         'foo.hbs': 'hi!',
       });
 
-      let output = await BroccoliTestHelper.createTempDir();
+      let output = await createTempDir();
       let outputJSONPath = output.path('out.json');
       await run({ '--path': input.path(), '--output-path': outputJSONPath });
 
       let parsedOutput = require(outputJSONPath);
 
-      assert.mangledStringsEqual(parsedOutput, {
-        'hi!': 1,
-      });
+      expect(parsedOutput).toEqual(mangle({ 'hi!': 1 }));
 
       await output.dispose();
     });
   });
 
-  describe('process', function (hooks) {
-    hooks.beforeEach(() => {
+  describe('process', function () {
+    beforeEach(() => {
       input.write({
         mangled: {
           '001.json': generateHashedFileContent({ derp: 1 }),
@@ -107,7 +95,7 @@ describe('StringCollector CLI', function (hooks) {
       });
     });
 
-    it('emits to stdout by default', async function (assert) {
+    it('emits to stdout by default', async function () {
       let result = await run('process', {
         '--mangled-dir': input.path('mangled'),
         '--unmangled-file': input.path('unmangled.json'),
@@ -115,13 +103,13 @@ describe('StringCollector CLI', function (hooks) {
 
       let parsedOutput = JSON.parse(result.stdout);
 
-      assert.deepEqual(parsedOutput, {
+      expect(parsedOutput).toEqual({
         derp: 100,
       });
     });
 
-    it('emits to file with --output-path option ', async function (assert) {
-      let output = await BroccoliTestHelper.createTempDir();
+    it('emits to file with --output-path option ', async function () {
+      let output = await createTempDir();
       let outputJSONPath = output.path('out.json');
 
       await run('process', {
@@ -132,7 +120,7 @@ describe('StringCollector CLI', function (hooks) {
 
       let parsedOutput = require(outputJSONPath);
 
-      assert.deepEqual(parsedOutput, {
+      expect(parsedOutput).toEqual({
         derp: 100,
       });
 

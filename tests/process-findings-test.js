@@ -1,31 +1,25 @@
 'use strict';
 
-const BroccoliTestHelper = require('broccoli-test-helper');
+const { createTempDir } = require('broccoli-test-helper');
 const ProcessFindings = require('../src/process-findings');
-const helpers = require('./helpers');
-const generateHashedFileContent = helpers.generateHashedFileContent;
-
-const QUnit = require('./qunit');
-const describe = QUnit.module;
-const it = QUnit.test; // eslint-disable-line
-const todo = QUnit.todo; // eslint-disable-line
+const { generateHashedFileContent } = require('./helpers');
 
 const root = process.cwd();
 
-describe('ProcessFindings', function (hooks) {
+describe('ProcessFindings', function () {
   let input;
 
-  hooks.beforeEach(async function () {
-    input = await BroccoliTestHelper.createTempDir();
+  beforeEach(async function () {
+    input = await createTempDir();
   });
 
-  hooks.afterEach(function () {
+  afterEach(function () {
     process.chdir(root);
 
     return input.dispose();
   });
 
-  it('it merges known strings', function (assert) {
+  it('it merges known strings', function () {
     input.write({
       mangled: {
         '001.json': generateHashedFileContent({ derp: 1 }),
@@ -44,12 +38,12 @@ describe('ProcessFindings', function (hooks) {
 
     let parsedResult = JSON.parse(instance.result);
 
-    assert.deepEqual(parsedResult, {
+    expect(parsedResult).toEqual({
       derp: 100,
     });
   });
 
-  it('only includes strings that are used by specified number of consumers', function (assert) {
+  it('only includes strings that are used by specified number of consumers', function () {
     input.write({
       mangled: {
         '001.json': generateHashedFileContent({ derp: 1 }),
@@ -89,10 +83,10 @@ describe('ProcessFindings', function (hooks) {
     let parsedResult = JSON.parse(instance.result);
 
     let keys = Object.keys(parsedResult);
-    assert.deepEqual(keys, ['derp', 'huzzah', 'snark']);
+    expect(keys).toEqual(['derp', 'huzzah', 'snark']);
   });
 
-  it('sorts results by count', function (assert) {
+  it('sorts results by count', function () {
     input.write({
       mangled: {
         '005.json': generateHashedFileContent({ derp: 1 }),
@@ -131,6 +125,6 @@ describe('ProcessFindings', function (hooks) {
 
     let parsedResult = JSON.parse(instance.result);
 
-    assert.deepEqual(Object.keys(parsedResult), ['huzzah', 'derp', 'snark']);
+    expect(Object.keys(parsedResult)).toEqual(['huzzah', 'derp', 'snark']);
   });
 });
