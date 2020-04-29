@@ -6,41 +6,21 @@ const hash = require('./utils/hash');
 const walkSync = require('walk-sync');
 const { preprocess, traverse } = require('@glimmer/syntax');
 
-function buildStringCollector(counter) {
-  return {
-    ElementNode(node) {
-      counter.incrementStringCount(node.tag);
-    },
-    TextNode(node) {
-      counter.incrementStringCount(node.chars);
-    },
-    PathExpression(node) {
-      for (let part of node.parts) {
-        counter.incrementStringCount(part);
-      }
-    },
-    AttrNode(node) {
-      counter.incrementStringCount(node.name);
-    },
-    HashPair(node) {
-      counter.incrementStringCount(node.key);
-    },
-  };
-}
-
-module.exports = class CollectStrings {
+module.exports = class Collector {
   constructor(_options) {
     let options = _options || {};
     this._path = options.path || process.cwd();
     this._mangle = 'mangle' in options ? options.mangle : true;
     this._fileProcessed = options.fileProcessed || function () {};
+    this._visitorPath = options.visitorPath;
 
     this._map = Object.create(null);
     this._files = null;
   }
 
-  incrementStringCount(string) {
+  increment(string) {
     let count = this._map[string] || 0;
+
     this._map[string] = count + 1;
   }
 
@@ -60,6 +40,8 @@ module.exports = class CollectStrings {
   }
 
   populate() {
+    let visitor = require(this._visitorPath)(this.increment.bind(this));
+
     for (let relativePath of this.files) {
       let fullPath = path.join(this._path, relativePath);
       let contents = fs.readFileSync(fullPath, { encoding: 'utf-8' });
@@ -68,7 +50,8 @@ module.exports = class CollectStrings {
         let ast = preprocess(contents, {
           mode: 'codemod',
         });
-        traverse(ast, buildStringCollector(this));
+
+        traverse(ast, visitor);
       } catch (e) {
         // do nothing
       }

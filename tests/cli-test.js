@@ -1,31 +1,25 @@
 'use strict';
 
-const path = require('path');
 const { createTempDir } = require('broccoli-test-helper');
 const execa = require('execa');
 const { generateHashedFileContent, mangle } = require('./helpers');
 
 const root = process.cwd();
 
-describe('StringCollector CLI', function () {
+describe('CLI', function () {
   let input;
 
-  function run() {
-    let options, command;
-    if (arguments.length === 2) {
-      command = arguments[0];
-      options = arguments[1];
-    } else {
-      command = null;
-      options = arguments[0] || {};
-    }
-
-    let executablePath = path.join(__dirname, '..', 'src', 'cli.js');
-    let args = [executablePath, command].filter(Boolean);
+  function run(command, options = {}) {
+    let executablePath = require.resolve('../src/cli.js');
+    let args = [executablePath, command];
 
     let keys = Object.keys(options);
     for (let key of keys) {
       args.push(key, options[key]);
+    }
+
+    if (command === 'gather' && options['visitor-path'] === undefined) {
+      args.push('--visitor-path', require.resolve('./string-collector'));
     }
 
     return execa(process.execPath, args);
@@ -49,7 +43,7 @@ describe('StringCollector CLI', function () {
         'foo.hbs': 'hi!',
       });
 
-      let output = await run();
+      let output = await run('gather');
       let parsedOutput = JSON.parse(output.stdout);
 
       expect(parsedOutput).toEqual(mangle({ 'hi!': 1 }));
@@ -60,7 +54,7 @@ describe('StringCollector CLI', function () {
         'foo.hbs': 'hi!',
       });
 
-      let output = await run({ '--path': input.path() });
+      let output = await run('gather', { '--path': input.path() });
       let parsedOutput = JSON.parse(output.stdout);
 
       expect(parsedOutput).toEqual(mangle({ 'hi!': 1 }));
@@ -73,7 +67,10 @@ describe('StringCollector CLI', function () {
 
       let output = await createTempDir();
       let outputJSONPath = output.path('out.json');
-      await run({ '--path': input.path(), '--output-path': outputJSONPath });
+      await run('gather', {
+        '--path': input.path(),
+        '--output-path': outputJSONPath,
+      });
 
       let parsedOutput = require(outputJSONPath);
 
