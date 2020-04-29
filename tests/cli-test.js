@@ -34,7 +34,7 @@ describe('StringCollector CLI', function(hooks) {
       args.push(key, options[key]);
     }
 
-    return execa('node', args);
+    return execa(process.execPath, args);
   }
 
   hooks.beforeEach(async function () {
