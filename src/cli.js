@@ -15,14 +15,21 @@ require('yargs')
       return yargs
         .usage(`${name} <options>`)
         .option('path', { type: 'string', describe: 'directory to process' })
-        .option('mangle', { type: 'boolean', default: true, describe: 'hashes strings to be unrecognized' })
-        .option('output-path', { type: 'string', describe: 'write JSON file of string counts' })
+        .option('mangle', {
+          type: 'boolean',
+          default: true,
+          describe: 'hashes strings to be unrecognized',
+        })
+        .option('output-path', {
+          type: 'string',
+          describe: 'write JSON file of string counts',
+        })
         .default('path', () => process.cwd(), '.');
     },
     handler(argv) {
       let collector = new StringCollector({
         path: argv.path,
-        mangle: argv.mangle
+        mangle: argv.mangle,
       });
 
       collector.populate();
@@ -33,9 +40,8 @@ require('yargs')
       } else {
         console.log(jsonOutput); // eslint-disable-line no-console
       }
-    }
+    },
   })
-
 
   .command({
     command: 'process',
@@ -43,17 +49,29 @@ require('yargs')
     builder(yargs) {
       return yargs
         .usage(`${name} process <options>`)
-        .option('mangled-dir', { type: 'string', describe: 'directory to process' })
-        .option('unmangled-file', { type: 'string', describe: 'unmangled file to use to reverse hashing' })
-        .option('consumer-threshold', { type: 'number', describe: 'minimum number of consumers to consider a string' })
-        .option('output-path', { type: 'string', describe: 'write JSON file of string counts' })
+        .option('mangled-dir', {
+          type: 'string',
+          describe: 'directory to process',
+        })
+        .option('unmangled-file', {
+          type: 'string',
+          describe: 'unmangled file to use to reverse hashing',
+        })
+        .option('consumer-threshold', {
+          type: 'number',
+          describe: 'minimum number of consumers to consider a string',
+        })
+        .option('output-path', {
+          type: 'string',
+          describe: 'write JSON file of string counts',
+        })
         .default('path', () => process.cwd(), '.');
     },
     handler(argv) {
       let instance = new ProcessFindings({
         mangledDir: argv.mangledDir,
         unmangledPath: argv.unmangledFile,
-        consumerThreshold: argv.consumerThreshold
+        consumerThreshold: argv.consumerThreshold,
       });
 
       instance.discover();
@@ -63,9 +81,7 @@ require('yargs')
       } else {
         console.log(jsonOutput); // eslint-disable-line no-console
       }
-    }
+    },
   })
 
-
-  .help()
-  .argv;
+  .help().argv;

@@ -13,5 +13,5 @@ function generateHashedFileContent(map) {
 }
 
 module.exports = {
-  generateHashedFileContent
+  generateHashedFileContent,
 };
