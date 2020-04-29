@@ -6,48 +6,6 @@ const hash = require('./utils/hash');
 const walkSync = require('walk-sync');
 const { preprocess, traverse } = require('@glimmer/syntax');
 
-function transformDotComponentInvocation(env) {
-  let builders = env.syntax.builders;
-
-  function isMultipartPath(path) {
-    return path.parts && path.parts.length > 1;
-  }
-
-  function isInlineInvocation(path, params, hash) {
-    if (isMultipartPath(path)) {
-      if (params.length > 0 || hash.pairs.length > 0) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  function wrapInComponent(node) {
-    let component = node.path;
-    let componentHelper = builders.path('component');
-    node.path = componentHelper;
-    node.params.unshift(component);
-  }
-
-  return {
-    name: 'transform-dot-component-invocation',
-
-    visitor: {
-      MustacheStatement: node => {
-        if (isInlineInvocation(node.path, node.params, node.hash)) {
-          wrapInComponent(node);
-        }
-      },
-      BlockStatement: node => {
-        if (isMultipartPath(node.path)) {
-          wrapInComponent(node);
-        }
-      },
-    },
-  };
-}
-
 function buildStringCollector(counter)  {
   return {
     ElementNode(node) {

@@ -23,4 +23,5 @@ jobs:
         node-version: ${{ matrix.node-version }}
         yarn-version: 1.22.4
     - run: yarn install --frozen-lockfile --non-interactive
+    - run: yarn lint:js
     - run: yarn test
