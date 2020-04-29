@@ -2,7 +2,7 @@
 
 const hashString = require('../src/utils/hash');
 
-QUnit.assert.mangledStringsEqual = function(mangled, expected) {
+QUnit.assert.mangledStringsEqual = function (mangled, expected) {
   let expectedKeys = Object.keys(expected);
   let mangledKeys = Object.keys(mangled);
   if (expectedKeys.length !== mangledKeys.length) {
@@ -10,7 +10,7 @@ QUnit.assert.mangledStringsEqual = function(mangled, expected) {
       result: false,
       actual: mangledKeys.length,
       expected: expectedKeys.length,
-      message: 'count of properties should match'
+      message: 'count of properties should match',
     });
 
     return;

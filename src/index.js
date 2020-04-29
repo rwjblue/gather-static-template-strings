@@ -6,7 +6,7 @@ const hash = require('./utils/hash');
 const walkSync = require('walk-sync');
 const { preprocess, traverse } = require('@glimmer/syntax');
 
-function buildStringCollector(counter)  {
+function buildStringCollector(counter) {
   return {
     ElementNode(node) {
       counter.incrementStringCount(node.tag);
@@ -24,7 +24,7 @@ function buildStringCollector(counter)  {
     },
     HashPair(node) {
       counter.incrementStringCount(node.key);
-    }
+    },
   };
 }
 
@@ -33,7 +33,7 @@ module.exports = class CollectStrings {
     let options = _options || {};
     this._path = options.path || process.cwd();
     this._mangle = 'mangle' in options ? options.mangle : true;
-    this._fileProcessed = options.fileProcessed || function() {};
+    this._fileProcessed = options.fileProcessed || function () {};
 
     this._map = Object.create(null);
     this._files = null;
@@ -46,9 +46,12 @@ module.exports = class CollectStrings {
 
   get files() {
     if (!this._files) {
-      let files = walkSync(this._path, { globs: ['**/*.hbs'], directories: false })
-          .filter(path => !path.startsWith('tmp'))
-          .filter(path => !path.startsWith('node_modules'));
+      let files = walkSync(this._path, {
+        globs: ['**/*.hbs'],
+        directories: false,
+      })
+        .filter((path) => !path.startsWith('tmp'))
+        .filter((path) => !path.startsWith('node_modules'));
 
       this._files = files;
     }
@@ -66,7 +69,7 @@ module.exports = class CollectStrings {
           mode: 'codemod',
         });
         traverse(ast, buildStringCollector(this));
-      } catch(e) {
+      } catch (e) {
         // do nothing
       }
 

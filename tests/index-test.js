@@ -10,65 +10,65 @@ const todo = QUnit.todo; // eslint-disable-line
 
 const root = process.cwd();
 
-describe('StringCollector', function(hooks) {
+describe('StringCollector', function (hooks) {
   let input;
 
   hooks.beforeEach(async function () {
     input = await BroccoliTestHelper.createTempDir();
   });
 
-  hooks.afterEach(function() {
+  hooks.afterEach(function () {
     process.chdir(root);
 
     return input.dispose();
   });
 
-  it('should capture strings across templates', function(assert) {
+  it('should capture strings across templates', function (assert) {
     input.write({
-      'foo': {
-        'bar': {
+      foo: {
+        bar: {
           'baz.hbs': 'derp',
-          'qux.hbs': 'derp'
-        }
-      }
-    });
-
-    let instance = new StringCollector({
-      path: input.path()
-    });
-
-    instance.populate();
-
-    assert.mangledStringsEqual(instance.strings, {
-      'derp': 2
-    });
-  });
-
-  it('should not capture strings from tmp', function(assert) {
-    input.write({
-      'tmp': {
-        'derp.hbs': 'derp'
+          'qux.hbs': 'derp',
+        },
       },
-      'foo': {
-        'bar': {
-          'baz.hbs': 'derp',
-          'qux.hbs': 'derp'
-        }
-      }
     });
 
     let instance = new StringCollector({
-      path: input.path()
+      path: input.path(),
     });
 
     instance.populate();
 
     assert.mangledStringsEqual(instance.strings, {
-      'derp': 2
+      derp: 2,
     });
   });
 
-  it('defaults to process.cwd', function(assert) {
+  it('should not capture strings from tmp', function (assert) {
+    input.write({
+      tmp: {
+        'derp.hbs': 'derp',
+      },
+      foo: {
+        bar: {
+          'baz.hbs': 'derp',
+          'qux.hbs': 'derp',
+        },
+      },
+    });
+
+    let instance = new StringCollector({
+      path: input.path(),
+    });
+
+    instance.populate();
+
+    assert.mangledStringsEqual(instance.strings, {
+      derp: 2,
+    });
+  });
+
+  it('defaults to process.cwd', function (assert) {
     process.chdir(input.path());
     input.write({ 'foo.hbs': 'hi!' });
 
@@ -78,7 +78,7 @@ describe('StringCollector', function(hooks) {
     assert.mangledStringsEqual(instance.strings, { 'hi!': 1 });
   });
 
-  it('can generate non-mangled list of strings', function(assert) {
+  it('can generate non-mangled list of strings', function (assert) {
     process.chdir(input.path());
     input.write({ 'foo.hbs': 'hi!' });
 
@@ -88,9 +88,11 @@ describe('StringCollector', function(hooks) {
     assert.deepEqual(instance.strings, { 'hi!': 1 });
   });
 
-  it('identifies strings within ambiguous contextual component invocations', function(assert) {
+  it('identifies strings within ambiguous contextual component invocations', function (assert) {
     process.chdir(input.path());
-    input.write({ 'foo.hbs': '{{#foo-bar as |bar|}}{{#bar.baz}}Hi!{{/bar.baz}}{{/foo-bar}}'});
+    input.write({
+      'foo.hbs': '{{#foo-bar as |bar|}}{{#bar.baz}}Hi!{{/bar.baz}}{{/foo-bar}}',
+    });
 
     let instance = new StringCollector({ mangle: false });
     instance.populate();
@@ -98,32 +100,33 @@ describe('StringCollector', function(hooks) {
     assert.equal(instance.strings['Hi!'], 1);
   });
 
-  it('does not crash on invalid template contents', function(assert) {
+  it('does not crash on invalid template contents', function (assert) {
     process.chdir(input.path());
     input.write({ 'foo.hbs': '<p>' });
 
     let instance = new StringCollector({ mangle: false });
     instance.populate();
 
-    assert.deepEqual(instance.strings, { });
+    assert.deepEqual(instance.strings, {});
   });
 
-  it('calls fileProcessed callback for each file', function(assert) {
+  it('calls fileProcessed callback for each file', function (assert) {
     process.chdir(input.path());
 
     input.write({
       'foo.hbs': 'hi!',
-      'bar.hbs': 'derp'
+      'bar.hbs': 'derp',
     });
 
     let instance = new StringCollector({
       mangle: false,
-      fileProcessed(path) { assert.step(path); }
+      fileProcessed(path) {
+        assert.step(path);
+      },
     });
     instance.populate();
 
-
     assert.verifySteps(['bar.hbs', 'foo.hbs']);
-    assert.deepEqual(instance.strings, { 'hi!': 1, 'derp': 1 });
+    assert.deepEqual(instance.strings, { 'hi!': 1, derp: 1 });
   });
 });
