@@ -13,7 +13,7 @@ const todo = QUnit.todo; // eslint-disable-line
 
 const root = process.cwd();
 
-describe('StringCollector CLI', function(hooks) {
+describe('StringCollector CLI', function (hooks) {
   let input;
 
   function run() {
@@ -41,44 +41,44 @@ describe('StringCollector CLI', function(hooks) {
     input = await BroccoliTestHelper.createTempDir();
   });
 
-  hooks.afterEach(function() {
+  hooks.afterEach(function () {
     process.chdir(root);
 
     return input.dispose();
   });
 
-  describe('gather', function() {
+  describe('gather', function () {
     it('should run by default', async function (assert) {
       process.chdir(input.path());
 
       input.write({
-        'foo.hbs': 'hi!'
+        'foo.hbs': 'hi!',
       });
 
       let output = await run();
       let parsedOutput = JSON.parse(output.stdout);
 
       assert.mangledStringsEqual(parsedOutput, {
-        'hi!': 1
+        'hi!': 1,
       });
     });
 
     it('allows --path option ', async function (assert) {
       input.write({
-        'foo.hbs': 'hi!'
+        'foo.hbs': 'hi!',
       });
 
       let output = await run({ '--path': input.path() });
       let parsedOutput = JSON.parse(output.stdout);
 
       assert.mangledStringsEqual(parsedOutput, {
-        'hi!': 1
+        'hi!': 1,
       });
     });
 
     it('allows --output-path option ', async function (assert) {
       input.write({
-        'foo.hbs': 'hi!'
+        'foo.hbs': 'hi!',
       });
 
       let output = await BroccoliTestHelper.createTempDir();
@@ -88,36 +88,35 @@ describe('StringCollector CLI', function(hooks) {
       let parsedOutput = require(outputJSONPath);
 
       assert.mangledStringsEqual(parsedOutput, {
-        'hi!': 1
+        'hi!': 1,
       });
 
       await output.dispose();
     });
   });
 
-  describe('process', function(hooks) {
+  describe('process', function (hooks) {
     hooks.beforeEach(() => {
       input.write({
         mangled: {
           '001.json': generateHashedFileContent({ derp: 1 }),
           '002.json': generateHashedFileContent({ derp: 2, huzzah: 1 }),
-          '003.json': generateHashedFileContent({ derp: 3, dorp: 1 })
+          '003.json': generateHashedFileContent({ derp: 3, dorp: 1 }),
         },
-        'unmangled.json': JSON.stringify({ derp: 3, honk: 2 })
+        'unmangled.json': JSON.stringify({ derp: 3, honk: 2 }),
       });
     });
-
 
     it('emits to stdout by default', async function (assert) {
       let result = await run('process', {
         '--mangled-dir': input.path('mangled'),
-        '--unmangled-file': input.path('unmangled.json')
+        '--unmangled-file': input.path('unmangled.json'),
       });
 
       let parsedOutput = JSON.parse(result.stdout);
 
       assert.deepEqual(parsedOutput, {
-        derp: 100
+        derp: 100,
       });
     });
 
@@ -128,13 +127,13 @@ describe('StringCollector CLI', function(hooks) {
       await run('process', {
         '--mangled-dir': input.path('mangled'),
         '--unmangled-file': input.path('unmangled.json'),
-        '--output-path': outputJSONPath
+        '--output-path': outputJSONPath,
       });
 
       let parsedOutput = require(outputJSONPath);
 
       assert.deepEqual(parsedOutput, {
-        derp: 100
+        derp: 100,
       });
 
       await output.dispose();

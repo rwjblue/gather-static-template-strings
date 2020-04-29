@@ -34,7 +34,7 @@ class StringData {
     if (!this._count) {
       let count = 0;
       for (let reference of this.references) {
-        count += reference[0] / reference[1].total * 100;
+        count += (reference[0] / reference[1].total) * 100;
       }
 
       this._count = count;
@@ -68,7 +68,9 @@ module.exports = class ProcessFindings {
   }
 
   _buildHashToPlainStringMap() {
-    let unmangledContents = fs.readFileSync(this._unmangledPath, { encoding: 'utf-8' });
+    let unmangledContents = fs.readFileSync(this._unmangledPath, {
+      encoding: 'utf-8',
+    });
     let unmangled = JSON.parse(unmangledContents);
 
     for (let key in unmangled) {
@@ -85,7 +87,9 @@ module.exports = class ProcessFindings {
 
     for (let key in mangled) {
       let unmangledKey = this._knownStringsMap[key];
-      if (!unmangledKey) { continue; }
+      if (!unmangledKey) {
+        continue;
+      }
 
       let data = this._data[unmangledKey];
       if (!data) {
@@ -114,7 +118,9 @@ module.exports = class ProcessFindings {
 
     let result = '{';
     for (let item of results) {
-      result += `\n  ${JSON.stringify(item.value)}: ${(item.count / this._totalFiles).toFixed(3)},`;
+      result += `\n  ${JSON.stringify(item.value)}: ${(
+        item.count / this._totalFiles
+      ).toFixed(3)},`;
     }
 
     result = result.slice(0, -1) + `\n}`;
