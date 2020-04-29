@@ -12,7 +12,7 @@ module.exports = {
     {
       files: ['tests/**/*.js'],
       env: {
-        qunit: true,
+        jest: true,
       }
     }
   ],

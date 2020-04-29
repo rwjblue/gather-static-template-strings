@@ -1,29 +1,25 @@
 'use strict';
 
-const BroccoliTestHelper = require('broccoli-test-helper');
+const { createTempDir } = require('broccoli-test-helper');
+const { mangle } = require('./helpers');
 const StringCollector = require('../src');
-
-const QUnit = require('./qunit');
-const describe = QUnit.module;
-const it = QUnit.test; // eslint-disable-line
-const todo = QUnit.todo; // eslint-disable-line
 
 const root = process.cwd();
 
-describe('StringCollector', function (hooks) {
+describe('StringCollector', function () {
   let input;
 
-  hooks.beforeEach(async function () {
-    input = await BroccoliTestHelper.createTempDir();
+  beforeEach(async function () {
+    input = await createTempDir();
   });
 
-  hooks.afterEach(function () {
+  afterEach(async function () {
     process.chdir(root);
 
-    return input.dispose();
+    await input.dispose();
   });
 
-  it('should capture strings across templates', function (assert) {
+  it('should capture strings across templates', function () {
     input.write({
       foo: {
         bar: {
@@ -39,12 +35,14 @@ describe('StringCollector', function (hooks) {
 
     instance.populate();
 
-    assert.mangledStringsEqual(instance.strings, {
-      derp: 2,
-    });
+    expect(instance.strings).toEqual(
+      mangle({
+        derp: 2,
+      })
+    );
   });
 
-  it('should not capture strings from tmp', function (assert) {
+  it('should not capture strings from tmp', function () {
     input.write({
       tmp: {
         'derp.hbs': 'derp',
@@ -63,32 +61,34 @@ describe('StringCollector', function (hooks) {
 
     instance.populate();
 
-    assert.mangledStringsEqual(instance.strings, {
-      derp: 2,
-    });
+    expect(instance.strings).toEqual(
+      mangle({
+        derp: 2,
+      })
+    );
   });
 
-  it('defaults to process.cwd', function (assert) {
+  it('defaults to process.cwd', function () {
     process.chdir(input.path());
     input.write({ 'foo.hbs': 'hi!' });
 
     let instance = new StringCollector();
     instance.populate();
 
-    assert.mangledStringsEqual(instance.strings, { 'hi!': 1 });
+    expect(instance.strings).toEqual(mangle({ 'hi!': 1 }));
   });
 
-  it('can generate non-mangled list of strings', function (assert) {
+  it('can generate non-mangled list of strings', function () {
     process.chdir(input.path());
     input.write({ 'foo.hbs': 'hi!' });
 
     let instance = new StringCollector({ mangle: false });
     instance.populate();
 
-    assert.deepEqual(instance.strings, { 'hi!': 1 });
+    expect(instance.strings).toEqual({ 'hi!': 1 });
   });
 
-  it('identifies strings within ambiguous contextual component invocations', function (assert) {
+  it('identifies strings within ambiguous contextual component invocations', function () {
     process.chdir(input.path());
     input.write({
       'foo.hbs': '{{#foo-bar as |bar|}}{{#bar.baz}}Hi!{{/bar.baz}}{{/foo-bar}}',
@@ -97,20 +97,21 @@ describe('StringCollector', function (hooks) {
     let instance = new StringCollector({ mangle: false });
     instance.populate();
 
-    assert.equal(instance.strings['Hi!'], 1);
+    expect(instance.strings['Hi!']).toEqual(1);
   });
 
-  it('does not crash on invalid template contents', function (assert) {
+  it('does not crash on invalid template contents', function () {
     process.chdir(input.path());
     input.write({ 'foo.hbs': '<p>' });
 
     let instance = new StringCollector({ mangle: false });
     instance.populate();
 
-    assert.deepEqual(instance.strings, {});
+    expect(instance.strings).toEqual({});
   });
 
-  it('calls fileProcessed callback for each file', function (assert) {
+  it('calls fileProcessed callback for each file', function () {
+    let steps = [];
     process.chdir(input.path());
 
     input.write({
@@ -121,12 +122,15 @@ describe('StringCollector', function (hooks) {
     let instance = new StringCollector({
       mangle: false,
       fileProcessed(path) {
-        assert.step(path);
+        steps.push(path);
       },
     });
     instance.populate();
 
-    assert.verifySteps(['bar.hbs', 'foo.hbs']);
-    assert.deepEqual(instance.strings, { 'hi!': 1, derp: 1 });
+    expect(steps).toEqual(['bar.hbs', 'foo.hbs']);
+    expect(instance.strings).toEqual({
+      'hi!': 1,
+      derp: 1,
+    });
   });
 });

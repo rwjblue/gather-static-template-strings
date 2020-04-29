@@ -2,16 +2,24 @@
 
 const hashString = require('../src/utils/hash');
 
-function generateHashedFileContent(map) {
-  let mangledMap = Object.create(null);
-  for (let key in map) {
+function mangle(expected) {
+  let keys = Object.keys(expected);
+  let mangled = Object.create(null);
+  for (let key of keys) {
     let mangledKey = hashString(key);
-    mangledMap[mangledKey] = map[key];
+    mangled[mangledKey] = expected[key];
   }
 
-  return JSON.stringify(mangledMap);
+  return mangled;
+}
+
+function generateHashedFileContent(map) {
+  let mangled = mangle(map);
+
+  return JSON.stringify(mangled);
 }
 
 module.exports = {
+  mangle,
   generateHashedFileContent,
 };
