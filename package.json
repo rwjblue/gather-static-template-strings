@@ -16,7 +16,10 @@
   "devDependencies": {
     "broccoli-test-helper": "^2.0.0",
     "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.3",
     "execa": "^4.0.0",
+    "prettier": "^2.0.5",
     "qunit": "^2.9.3"
   },
   "dependencies": {
